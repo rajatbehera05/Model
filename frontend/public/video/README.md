@@ -1,0 +1,1 @@
+# Static Video Assets Directory

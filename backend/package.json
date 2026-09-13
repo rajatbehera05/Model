@@ -1,0 +1,25 @@
+{
+  "name": "smart-parking-backend",
+  "version": "1.0.0",
+  "description": "Backend server for IoT Smart Parking System (3-Slot Prototype)",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "test": "node test.js",
+    "simulate": "node simulator.js test",
+    "simulate:cli": "node simulator.js"
+  },
+  "keywords": [
+    "iot",
+    "smart-parking",
+    "esp32",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}
