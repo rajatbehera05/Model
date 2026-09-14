@@ -47,11 +47,11 @@ export function LiveParkingMap({ slots, slotDetails, gate, onSlotClick }) {
   };
 
   return (
-    <div className="bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card">
+    <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card">
       {/* Top Map Header & Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-3">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">
               Live Facility Layout
             </h2>
@@ -65,26 +65,26 @@ export function LiveParkingMap({ slots, slotDetails, gate, onSlotClick }) {
         </div>
 
         {/* Status Legend */}
-        <div className="flex items-center gap-3.5 text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] shadow-xs self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3.5 text-[11px] sm:text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-2.5 sm:px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] shadow-xs self-start sm:self-auto">
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shadow-xs" />
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#10B981] shadow-xs" />
             <span>Available</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#F59E0B]" />
             <span>Reserved</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+            <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#EF4444]" />
             <span>Occupied</span>
           </span>
         </div>
       </div>
 
       {/* Main Parking Floor Environment */}
-      <div className="mt-5 rounded-[16px] bg-[#F8FAFC] border border-[#E2E8F0] p-4 sm:p-6 parking-pavement shadow-xs">
+      <div className="mt-4 sm:mt-5 rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] border border-[#E2E8F0] p-3 sm:p-6 parking-pavement shadow-xs">
         {/* The 3 Dedicated Parking Bays */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6">
           {slotList.map((slot) => {
             const config = getSlotDetails(slot.status);
             const isOccupied = slot.status === 'Occupied';
@@ -104,7 +104,7 @@ export function LiveParkingMap({ slots, slotDetails, gate, onSlotClick }) {
                     onSlotClick(slot.id);
                   }
                 }}
-                className={`relative rounded-[16px] p-5 flex flex-col justify-between min-h-[340px] cursor-pointer shadow-sm ${config.cardBg}`}
+                className={`relative rounded-[14px] sm:rounded-[16px] p-4 sm:p-5 flex flex-col justify-between min-h-[300px] sm:min-h-[340px] cursor-pointer shadow-sm ${config.cardBg}`}
               >
                 {/* Bay Header */}
                 <div className="flex items-center justify-between">
@@ -198,24 +198,24 @@ export function LiveParkingMap({ slots, slotDetails, gate, onSlotClick }) {
         <motion.div
           whileHover={{ y: -2, boxShadow: '0 8px 20px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="mt-5 pt-3.5 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-3 bg-white px-4 py-3 rounded-[14px] border border-[#E2E8F0] shadow-xs"
+          className="mt-4 sm:mt-5 pt-3 sm:pt-3.5 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white px-3 sm:px-4 py-3 rounded-[12px] sm:rounded-[14px] border border-[#E2E8F0] shadow-xs"
         >
           <div className="flex items-center gap-2.5 text-xs text-[#0F172A] font-bold">
-            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] flex items-center justify-center font-black">
+            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] flex items-center justify-center font-black shrink-0">
               <ArrowDown className="w-4 h-4" />
             </div>
             <div>
               <span className="block leading-tight font-extrabold">Entrance & Drive Aisle</span>
-              <span className="text-[11px] text-[#64748B] font-semibold">Direct vehicle entry corridor</span>
+              <span className="text-[10px] sm:text-[11px] text-[#64748B] font-semibold">Direct vehicle entry corridor</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-[#F8FAFC] px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0]">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 bg-[#F8FAFC] px-3 sm:px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] w-full sm:w-auto">
             <div className="flex items-center gap-1.5 text-xs font-bold">
               {isGateOpen ? (
-                <DoorOpen className="w-4 h-4 text-[#10B981]" />
+                <DoorOpen className="w-4 h-4 text-[#10B981] shrink-0" />
               ) : (
-                <DoorClosed className="w-4 h-4 text-[#64748B]" />
+                <DoorClosed className="w-4 h-4 text-[#64748B] shrink-0" />
               )}
               <span className="text-[#64748B]">Entrance Gate:</span>
             </div>

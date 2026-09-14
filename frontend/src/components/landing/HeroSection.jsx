@@ -20,16 +20,16 @@ export function HeroSection({ onOpenDashboard }) {
             className="lg:col-span-5 flex flex-col justify-center space-y-5 text-left z-10 relative"
           >
             {/* Subtle soft backdrop shade behind the hero text block */}
-            <div className="absolute -inset-x-8 -inset-y-8 rounded-3xl bg-gradient-to-br from-blue-100/45 via-slate-100/35 to-transparent blur-2xl -z-10 pointer-events-none" />
+            <div className="absolute -inset-x-4 sm:-inset-x-8 -inset-y-6 sm:-inset-y-8 rounded-3xl bg-gradient-to-br from-blue-100/45 via-slate-100/35 to-transparent blur-2xl -z-10 pointer-events-none" />
 
             {/* IoT Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 text-blue-700 text-xs font-semibold w-fit shadow-sm shadow-blue-900/5 backdrop-blur-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-blue-50/90 border border-blue-200/80 text-blue-700 text-xs font-semibold w-fit shadow-sm shadow-blue-900/5 backdrop-blur-xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span>IoT-Powered Smart Parking</span>
             </div>
 
             {/* Headline with clear word text-shadow for depth */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[56px] xl:text-[62px] font-black tracking-tight leading-[1.06]">
+            <h1 className="text-3xl sm:text-5xl lg:text-[56px] xl:text-[62px] font-black tracking-tight leading-[1.1] sm:leading-[1.06] break-words">
               <span
                 className="text-slate-900"
                 style={{ textShadow: '0 3px 10px rgba(15, 23, 42, 0.22), 0 1px 2px rgba(15, 23, 42, 0.15)' }}
@@ -47,20 +47,20 @@ export function HeroSection({ onOpenDashboard }) {
 
             {/* Supporting Text */}
             <p
-              className="text-base text-slate-600 leading-relaxed font-normal max-w-lg"
+              className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal max-w-lg"
               style={{ textShadow: '0 1px 2px rgba(15, 23, 42, 0.08)' }}
             >
               Detect parking occupancy, assign available slots and control entry automatically with an ESP32-powered smart parking system.
             </p>
 
             {/* Primary Pill Button with enhanced depth shadow */}
-            <div className="pt-1">
+            <div className="pt-1 w-full sm:w-auto">
               <button
                 onClick={onOpenDashboard}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base tracking-tight shadow-lg shadow-blue-600/30 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all cursor-pointer group"
+                className="w-full sm:w-auto justify-center inline-flex items-center gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm sm:text-base tracking-tight shadow-lg shadow-blue-600/30 hover:shadow-xl hover:shadow-blue-600/40 hover:-translate-y-0.5 transition-all cursor-pointer group"
               >
                 <span>Open Dashboard</span>
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.4} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </button>
@@ -74,7 +74,7 @@ export function HeroSection({ onOpenDashboard }) {
             transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 relative w-full"
           >
-            <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xl shadow-slate-900/10">
+            <div className="relative w-full aspect-video rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-950 border border-slate-200/80 shadow-2xl shadow-slate-900/10">
               <video
                 ref={videoRef}
                 src="/video/video.mp4"

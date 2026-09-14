@@ -26,6 +26,7 @@ export default function App() {
   const [assignmentResult, setAssignmentResult] = useState(null);
   const [toast, setToast] = useState(null);
   const [showReserveModal, setShowReserveModal] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Poll backend every 800ms strictly according to PRD
   useEffect(() => {
@@ -171,6 +172,7 @@ export default function App() {
     setTimeout(() => {
       setActiveTab(newTab);
       setIsPageLoading(false);
+      setIsMobileSidebarOpen(false);
     }, 400);
   };
 
@@ -231,7 +233,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-[#0F172A] antialiased relative selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex font-sans text-[#0F172A] antialiased relative selection:bg-blue-600 selection:text-white overflow-x-hidden">
       {/* Subtle Ambient Background Gradients (Behind Content) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[160px] -right-[160px] w-[640px] h-[640px] rounded-full bg-gradient-to-br from-blue-100/40 via-indigo-50/25 to-transparent blur-3xl" />
@@ -239,7 +241,7 @@ export default function App() {
         <div className="absolute -bottom-[180px] right-[20%] w-[580px] h-[580px] rounded-full bg-gradient-to-t from-sky-100/30 via-purple-50/15 to-transparent blur-3xl" />
       </div>
 
-      {/* Left Sidebar */}
+      {/* Left Sidebar (Desktop Static + Mobile Drawer) */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={handleTabChange}
@@ -247,6 +249,8 @@ export default function App() {
         isLivePolling={!apiError}
         isPageLoading={isPageLoading}
         targetTab={targetTab}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -260,18 +264,19 @@ export default function App() {
           onFindParking={handleFindParking}
           actionLoading={actionLoading}
           availableCount={availableCount}
+          onToggleMobileSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
         />
 
         {/* Backend Connection Warning */}
         {apiError && (
-          <div className="bg-[#FEF2F2] border-b border-[#FCA5A5] text-[#DC2626] text-xs py-2 px-6 text-center font-bold flex items-center justify-center gap-2">
-            <AlertCircle className="w-4 h-4" />
-            <span>Backend unreachable at http://localhost:5000. Retrying in background...</span>
+          <div className="bg-[#FEF2F2] border-b border-[#FCA5A5] text-[#DC2626] text-xs py-2 px-4 sm:px-6 text-center font-bold flex items-center justify-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span className="truncate">Backend unreachable at http://localhost:5000. Retrying in background...</span>
           </div>
         )}
 
         {/* Main View Container with Loading Transition */}
-        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 max-w-7xl w-full mx-auto">
           <AnimatePresence mode="wait">
             {isPageLoading ? (
               <motion.div
@@ -333,15 +338,15 @@ export default function App() {
       {/* Reservation Picker Modal */}
       <AnimatePresence>
         {showReserveModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F172A]/40 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-[#0F172A]/40 backdrop-blur-xs">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-[18px] p-6 max-w-md w-full shadow-modal border border-[#E2E8F0] text-[#0F172A]"
+              className="bg-white rounded-[18px] p-4 sm:p-6 max-w-md w-full shadow-modal border border-[#E2E8F0] text-[#0F172A]"
             >
               <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0]">
-                <h3 className="text-base font-extrabold text-[#0F172A]">Reserve Parking Bay</h3>
+                <h3 className="text-sm sm:text-base font-extrabold text-[#0F172A]">Reserve Parking Bay</h3>
                 <button
                   onClick={() => setShowReserveModal(false)}
                   className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer"
@@ -354,7 +359,7 @@ export default function App() {
                 Select an available bay to lock for arrival. Optical IR sensors confirm arrival automatically.
               </p>
 
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3">
                 {['P1', 'P2', 'P3'].map((slotId) => {
                   const status = data?.slots?.[slotId] || 'Available';
                   const isAvailable = status === 'Available';
@@ -364,14 +369,14 @@ export default function App() {
                       key={slotId}
                       disabled={!isAvailable || actionLoading}
                       onClick={() => handleConfirmReservation(slotId)}
-                      className={`p-4 rounded-[14px] border-2 flex flex-col items-center justify-center transition-all ${
+                      className={`p-3 sm:p-4 rounded-[12px] sm:rounded-[14px] border-2 flex flex-col items-center justify-center transition-all ${
                         isAvailable
                           ? 'border-[#10B981] bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#065F46] cursor-pointer shadow-xs'
                           : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#94A3B8] cursor-not-allowed opacity-60'
                       }`}
                     >
-                      <span className="font-black text-lg">{slotId}</span>
-                      <span className="text-[10px] uppercase font-bold mt-1 tracking-wide">
+                      <span className="font-black text-base sm:text-lg">{slotId}</span>
+                      <span className="text-[9px] sm:text-[10px] uppercase font-bold mt-1 tracking-wide">
                         {status}
                       </span>
                     </button>
@@ -379,7 +384,7 @@ export default function App() {
                 })}
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-5 sm:mt-6 flex justify-end">
                 <button
                   onClick={() => setShowReserveModal(false)}
                   className="px-4 py-2 text-xs font-bold text-[#64748B] hover:bg-[#F1F5F9] rounded-[10px] border border-[#E2E8F0] transition-colors cursor-pointer"
@@ -399,7 +404,7 @@ export default function App() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 15 }}
-            className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-[14px] shadow-card border flex items-center gap-2.5 text-xs font-bold ${
+            className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 max-w-[calc(100vw-2rem)] px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-[14px] shadow-card border flex items-center gap-2.5 text-xs font-bold ${
               toast.type === 'success'
                 ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]'
                 : toast.type === 'error'
@@ -408,11 +413,11 @@ export default function App() {
             }`}
           >
             {toast.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+              <CheckCircle2 className="w-4 h-4 text-[#10B981] shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-[#EF4444]" />
+              <AlertCircle className="w-4 h-4 text-[#EF4444] shrink-0" />
             )}
-            <span>{toast.message}</span>
+            <span className="truncate">{toast.message}</span>
           </motion.div>
         )}
       </AnimatePresence>

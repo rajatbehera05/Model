@@ -1,13 +1,12 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  Grid, 
-  CalendarCheck, 
   Car, 
-  BarChart3, 
   SlidersHorizontal,
   RefreshCw,
-  Cpu
+  Cpu,
+  X
 } from 'lucide-react';
 
 export function Sidebar({ 
@@ -16,7 +15,9 @@ export function Sidebar({
   esp32, 
   isLivePolling,
   isPageLoading = false,
-  targetTab = null
+  targetTab = null,
+  isMobileOpen = false,
+  onCloseMobile = () => {}
 }) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -27,27 +28,45 @@ export function Sidebar({
   const isRealHardware = esp32?.connected === true;
   const isSimulator = esp32?.simulatorActive === true || esp32?.mode === 'Simulator';
 
-  return (
-    <aside className="w-64 bg-white border-r border-[#E2E8F0] flex flex-col justify-between shrink-0 h-screen sticky top-0 select-none shadow-xs">
+  const handleNavClick = (tabId) => {
+    setActiveTab(tabId);
+    if (onCloseMobile) {
+      onCloseMobile();
+    }
+  };
+
+  const renderSidebarBody = (isMobile = false) => (
+    <>
       <div>
         {/* Brand Header (Click to return to Landing Page) */}
-        <button
-          onClick={() => setActiveTab('landing')}
-          className="w-full text-left h-16 flex items-center px-6 border-b border-[#E2E8F0] gap-3 hover:bg-slate-50/80 transition-colors cursor-pointer group"
-          title="Return to Landing Page"
-        >
-          <div className="w-9 h-9 rounded-xl bg-[#2563EB] flex items-center justify-center text-white font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform">
-            P
-          </div>
-          <div>
-            <span className="font-extrabold text-base text-[#0F172A] tracking-tight block leading-tight">
-              Smart Parking
-            </span>
-            <span className="text-[11px] text-[#64748B] font-semibold block">
-              Facility Management
-            </span>
-          </div>
-        </button>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#E2E8F0]">
+          <button
+            onClick={() => handleNavClick('landing')}
+            className="text-left flex items-center gap-3 hover:bg-slate-50/80 transition-colors cursor-pointer group flex-1"
+            title="Return to Landing Page"
+          >
+            <div className="w-9 h-9 rounded-xl bg-[#2563EB] flex items-center justify-center text-white font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform shrink-0">
+              P
+            </div>
+            <div className="min-w-0">
+              <span className="font-extrabold text-base text-[#0F172A] tracking-tight block leading-tight truncate">
+                Smart Parking
+              </span>
+              <span className="text-[11px] text-[#64748B] font-semibold block truncate">
+                Facility Management
+              </span>
+            </div>
+          </button>
+          {isMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer ml-2"
+              aria-label="Close navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
 
         {/* Navigation Section */}
         <div className="p-3">
@@ -63,7 +82,7 @@ export function Sidebar({
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleNavClick(item.id)}
                   disabled={isPageLoading && isActive}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer ${
                     isActive
@@ -127,11 +146,48 @@ export function Sidebar({
         {/* Facility Info */}
         <div className="px-2 flex items-center justify-between text-[11px] text-[#64748B] font-semibold">
           <span className="truncate">Central Prototype Lot</span>
-          <span className="font-mono text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-0.5 rounded">
+          <span className="font-mono text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] px-2 py-0.5 rounded shrink-0">
             Zone A
           </span>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* 1. Desktop Static Sidebar (Visible on md and above) */}
+      <aside className="hidden md:flex w-64 bg-white border-r border-[#E2E8F0] flex-col justify-between shrink-0 h-screen sticky top-0 select-none shadow-xs z-20">
+        {renderSidebarBody(false)}
+      </aside>
+
+      {/* 2. Mobile Responsive Slide-Over Drawer with Backdrop (Visible on mobile/tablet below md) */}
+      <AnimatePresence>
+        {isMobileOpen && (
+          <div className="fixed inset-0 z-50 md:hidden flex">
+            {/* Dark Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={onCloseMobile}
+              className="fixed inset-0 bg-[#0F172A]/50 backdrop-blur-xs"
+            />
+
+            {/* Slide-out Drawer Panel */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+              className="relative w-72 max-w-[85vw] bg-white h-full flex flex-col justify-between shadow-2xl border-r border-[#E2E8F0] select-none z-10 overflow-y-auto"
+            >
+              {renderSidebarBody(true)}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

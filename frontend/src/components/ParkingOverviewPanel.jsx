@@ -20,7 +20,7 @@ export function ParkingOverviewPanel({
   const isLedOn = led?.on ?? false;
 
   return (
-    <div className="bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card flex flex-col justify-between space-y-5">
+    <div className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card flex flex-col justify-between space-y-4 sm:space-y-5">
       {/* Title */}
       <div className="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
         <div>
@@ -46,7 +46,7 @@ export function ParkingOverviewPanel({
       <motion.div
         whileHover={{ y: -3, scale: 1.01, boxShadow: '0 10px 24px -4px rgba(15,23,42,0.08)' }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className="rounded-[16px] bg-[#F8FAFC] p-5 border border-[#E2E8F0] text-center shadow-xs cursor-default"
+        className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] p-4 sm:p-5 border border-[#E2E8F0] text-center shadow-xs cursor-default"
       >
         <span className="text-xs font-bold text-[#64748B] uppercase tracking-wider block">
           Current Availability
@@ -56,9 +56,9 @@ export function ParkingOverviewPanel({
           key={percent}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="my-2"
+          className="my-1.5 sm:my-2"
         >
-          <span className="text-5xl font-black text-[#0F172A] tracking-tight">
+          <span className="text-4xl sm:text-5xl font-black text-[#0F172A] tracking-tight">
             {percent}%
           </span>
         </motion.div>
@@ -68,7 +68,7 @@ export function ParkingOverviewPanel({
         </p>
 
         {/* Clean Progress Bar */}
-        <div className="mt-4 w-full h-3 bg-[#E2E8F0] rounded-full overflow-hidden border border-[#CBD5E1]/40">
+        <div className="mt-3.5 sm:mt-4 w-full h-3 bg-[#E2E8F0] rounded-full overflow-hidden border border-[#CBD5E1]/40">
           <motion.div
             className={`h-full rounded-full transition-all ${
               percent === 0 ? 'bg-[#EF4444]' : percent <= 33 ? 'bg-[#F59E0B]' : 'bg-[#2563EB]'
@@ -86,17 +86,17 @@ export function ParkingOverviewPanel({
         <motion.div
           whileHover={{ y: -2, boxShadow: '0 6px 16px -3px rgba(15,23,42,0.06)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="flex items-center justify-between p-3 rounded-[12px] bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs cursor-default"
+          className="flex flex-wrap sm:flex-nowrap items-center justify-between p-3 rounded-[12px] bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs cursor-default gap-2"
         >
           <div className="flex items-center gap-2 text-[#0F172A]">
             {isGateOpen ? (
-              <DoorOpen className="w-4 h-4 text-[#10B981]" />
+              <DoorOpen className="w-4 h-4 text-[#10B981] shrink-0" />
             ) : (
-              <DoorClosed className="w-4 h-4 text-[#64748B]" />
+              <DoorClosed className="w-4 h-4 text-[#64748B] shrink-0" />
             )}
             <span className="font-bold">Entrance Barrier:</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded border ${
               isGateOpen ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]' : 'bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]'
             }`}>
@@ -119,13 +119,13 @@ export function ParkingOverviewPanel({
         <motion.div
           whileHover={{ y: -2, boxShadow: '0 6px 16px -3px rgba(15,23,42,0.06)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="flex items-center justify-between p-3 rounded-[12px] bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs cursor-default"
+          className="flex flex-wrap sm:flex-nowrap items-center justify-between p-3 rounded-[12px] bg-[#F8FAFC] border border-[#E2E8F0] shadow-xs cursor-default gap-2"
         >
           <div className="flex items-center gap-2 text-[#0F172A]">
-            <Lightbulb className={`w-4 h-4 ${isLedOn ? 'text-[#10B981]' : 'text-[#EF4444]'}`} />
+            <Lightbulb className={`w-4 h-4 shrink-0 ${isLedOn ? 'text-[#10B981]' : 'text-[#EF4444]'}`} />
             <span className="font-bold">Master Status LED:</span>
           </div>
-          <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded border ${
+          <span className={`font-mono font-bold text-[11px] px-2 py-0.5 rounded border shrink-0 ${
             isLedOn ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]' : 'bg-[#FEF2F2] text-[#EF4444] border-[#FCA5A5]'
           }`}>
             {isLedOn ? 'ON (SPACES FREE)' : 'OFF (LOT FULL)'}
@@ -142,13 +142,13 @@ export function ParkingOverviewPanel({
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           onClick={onFindParking}
           disabled={actionLoading || available === 0}
-          className={`w-full py-3 px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
+          className={`w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
             available === 0
               ? 'bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
               : 'bg-[#2563EB] hover:bg-[#1D4ED8] border-[#1D4ED8] text-white cursor-pointer shadow-md'
           }`}
         >
-          <Compass className="w-4 h-4" />
+          <Compass className="w-4 h-4 shrink-0" />
           <span>{actionLoading ? 'Allocating Bay...' : 'Find & Assign Parking'}</span>
         </motion.button>
 
@@ -159,13 +159,13 @@ export function ParkingOverviewPanel({
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           onClick={onReserveSlot}
           disabled={actionLoading || available === 0}
-          className={`w-full py-2.5 px-4 rounded-[12px] font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-2 shadow-xs ${
+          className={`w-full py-2 sm:py-2.5 px-3 sm:px-4 rounded-[12px] font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-2 shadow-xs ${
             available === 0
               ? 'border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed bg-[#F8FAFC]'
               : 'border-[#2563EB] text-[#2563EB] hover:bg-[#EFF6FF] bg-white cursor-pointer'
           }`}
         >
-          <BookmarkCheck className="w-4 h-4 text-[#2563EB]" />
+          <BookmarkCheck className="w-4 h-4 text-[#2563EB] shrink-0" />
           <span>Reserve Specific Bay</span>
         </motion.button>
       </div>

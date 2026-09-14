@@ -92,57 +92,57 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* 1. TOP SYSTEM HEALTH & CONNECTIVITY BAR */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Backend Server */}
         <motion.div
           whileHover={{ y: -3, scale: 1.015, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="bg-white rounded-[16px] p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
+          className="bg-white rounded-[14px] sm:rounded-[16px] p-3.5 sm:p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
         >
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-[12px] border ${
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-[10px] sm:rounded-[12px] border shrink-0 ${
               apiError 
                 ? 'bg-[#FEF2F2] text-[#EF4444] border-[#FCA5A5]' 
                 : 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]'
             }`}>
-              <Server className="w-5 h-5" />
+              <Server className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">Backend API</span>
-              <span className="font-extrabold text-sm text-[#0F172A]">
+              <span className="font-extrabold text-xs sm:text-sm text-[#0F172A]">
                 {apiError ? 'Unavailable' : 'Online (Port 5000)'}
               </span>
             </div>
           </div>
-          <span className={`w-2.5 h-2.5 rounded-full ${apiError ? 'bg-[#EF4444]' : 'bg-[#10B981] animate-pulse'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${apiError ? 'bg-[#EF4444]' : 'bg-[#10B981] animate-pulse'}`} />
         </motion.div>
 
         {/* ESP32 Microcontroller Status */}
         <motion.div
           whileHover={{ y: -3, scale: 1.015, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="bg-white rounded-[16px] p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
+          className="bg-white rounded-[14px] sm:rounded-[16px] p-3.5 sm:p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
         >
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-[12px] border ${
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-[10px] sm:rounded-[12px] border shrink-0 ${
               isRealHardware
                 ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
                 : isSimulatorActive
                 ? 'bg-[#FFFBEB] text-[#D97706] border-[#FCD34D]'
                 : 'bg-[#FEF2F2] text-[#EF4444] border-[#FCA5A5]'
             }`}>
-              <Cpu className="w-5 h-5" />
+              <Cpu className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">ESP32 Hardware</span>
-              <span className="font-extrabold text-sm text-[#0F172A]">
+              <span className="font-extrabold text-xs sm:text-sm text-[#0F172A]">
                 {isRealHardware ? 'ESP32 Connected' : isSimulatorActive ? 'Simulation Mode' : 'Hardware Offline'}
               </span>
             </div>
           </div>
-          <span className={`w-2.5 h-2.5 rounded-full ${
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
             isRealHardware ? 'bg-[#10B981] animate-pulse' : isSimulatorActive ? 'bg-[#F59E0B]' : 'bg-[#EF4444]'
           }`} />
         </motion.div>
@@ -151,18 +151,18 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
         <motion.div
           whileHover={{ y: -3, scale: 1.015, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="bg-white rounded-[16px] p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
+          className="bg-white rounded-[14px] sm:rounded-[16px] p-3.5 sm:p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
         >
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-[12px] bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
-              <RefreshCw className="w-5 h-5" />
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 rounded-[10px] sm:rounded-[12px] bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE] shrink-0">
+              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">Sensor Polling</span>
-              <span className="font-extrabold text-sm text-[#0F172A]">800ms Real-Time</span>
+              <span className="font-extrabold text-xs sm:text-sm text-[#0F172A]">800ms Real-Time</span>
             </div>
           </div>
-          <span className="text-[10px] font-mono font-bold bg-[#EFF6FF] text-[#2563EB] px-2 py-0.5 rounded border border-[#BFDBFE]">
+          <span className="text-[10px] font-mono font-bold bg-[#EFF6FF] text-[#2563EB] px-2 py-0.5 rounded border border-[#BFDBFE] shrink-0">
             ACTIVE
           </span>
         </motion.div>
@@ -171,24 +171,24 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
         <motion.div
           whileHover={{ y: -3, scale: 1.015, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          className="bg-white rounded-[16px] p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
+          className="bg-white rounded-[14px] sm:rounded-[16px] p-3.5 sm:p-4 border border-[#E2E8F0] shadow-card flex items-center justify-between cursor-default"
         >
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-[12px] border ${
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className={`p-2 sm:p-2.5 rounded-[10px] sm:rounded-[12px] border shrink-0 ${
               isLedOn 
                 ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]' 
                 : 'bg-[#FEF2F2] text-[#EF4444] border-[#FCA5A5]'
             }`}>
-              <Lightbulb className="w-5 h-5" />
+              <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">Master LED (GPIO 4)</span>
-              <span className={`font-extrabold text-sm ${isLedOn ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
+              <span className={`font-extrabold text-xs sm:text-sm ${isLedOn ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
                 {isLedOn ? 'ON (Spaces Free)' : 'OFF (Lot Full)'}
               </span>
             </div>
           </div>
-          <span className={`w-2.5 h-2.5 rounded-full ${isLedOn ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isLedOn ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`} />
         </motion.div>
       </div>
 
@@ -196,11 +196,11 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
       <motion.div 
         whileHover={{ y: -3, boxShadow: '0 16px 32px -6px rgba(15,23,42,0.08)' }}
         transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-        className="bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-5 transition-colors hover:border-[#3B82F6]/50"
+        className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-4 sm:space-y-5 transition-colors hover:border-[#3B82F6]/50"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-2.5 sm:gap-3">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">
                 Optical Infrared Sensor Telemetry
               </h2>
@@ -213,20 +213,20 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] shadow-xs self-start sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-2.5 sm:px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] shadow-xs self-start sm:self-auto">
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+              <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#10B981]" />
               <span>CLEAR (HIGH / 1)</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+              <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#EF4444]" />
               <span>OBSTACLE (LOW / 0)</span>
             </span>
           </div>
         </div>
 
         {/* 3 Dedicated IR Sensor Rows */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6">
           {slotDetails.map((slot) => {
             const isDetected = slot.sensorDetected === true;
             const mapping = pinMapping[slot.id] || { pin: 'GPIO --', label: 'IR Sensor' };
@@ -372,19 +372,19 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
       </motion.div>
 
       {/* 3. ENTRY GATE & ACTUATOR CONTROL PANEL */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
         {/* Left Column: Gate & Actuator Controls (7 cols) */}
         <motion.div 
           whileHover={{ y: -3, boxShadow: '0 16px 32px -6px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          className="lg:col-span-7 bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-5 transition-colors hover:border-[#3B82F6]/50"
+          className="lg:col-span-7 bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-4 sm:space-y-5 transition-colors hover:border-[#3B82F6]/50"
         >
           <div className="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
             <div>
               <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
                 Entry Gate & Actuator Control
               </h3>
-              <p className="text-xs font-semibold text-[#64748B] mt-0.5">
+              <p className="text-xs text-[#64748B] font-semibold mt-0.5">
                 SG90 Servo barrier arm control via PWM
               </p>
             </div>
@@ -401,31 +401,31 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
           <motion.div 
             whileHover={{ y: -2, scale: 1.01, boxShadow: '0 10px 24px -4px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="rounded-[16px] bg-[#F8FAFC] p-5 border border-[#E2E8F0] space-y-4 shadow-xs cursor-default"
+            className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] p-4 sm:p-5 border border-[#E2E8F0] space-y-3.5 sm:space-y-4 shadow-xs cursor-default"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={`p-3 rounded-[12px] border ${
+                <div className={`p-2.5 sm:p-3 rounded-[10px] sm:rounded-[12px] border shrink-0 ${
                   isGateOpen 
                     ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]' 
                     : 'bg-white text-[#64748B] border-[#E2E8F0]'
                 }`}>
-                  {isGateOpen ? <DoorOpen className="w-6 h-6" /> : <DoorClosed className="w-6 h-6" />}
+                  {isGateOpen ? <DoorOpen className="w-5 h-5 sm:w-6 sm:h-6" /> : <DoorClosed className="w-5 h-5 sm:w-6 sm:h-6" />}
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
                     Barrier Servo (GPIO 2 PWM)
                   </span>
-                  <span className="text-lg font-black text-[#0F172A]">
+                  <span className="text-base sm:text-lg font-black text-[#0F172A]">
                     {isGateOpen ? 'OPEN — 90° Passable' : 'CLOSED — 0° Blocked'}
                   </span>
                 </div>
               </div>
 
               {/* Angle Meter */}
-              <div className="text-right">
+              <div className="text-left sm:text-right pl-1 sm:pl-0">
                 <span className="text-[10px] font-bold text-[#64748B] block">Target Angle</span>
-                <span className="text-xl font-mono font-black text-[#0F172A]">
+                <span className="text-lg sm:text-xl font-mono font-black text-[#0F172A]">
                   {isGateOpen ? '90°' : '0°'}
                 </span>
               </div>
@@ -442,7 +442,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               onClick={handleTriggerGate}
               disabled={isLotFull || isGateOpen || gateLoading}
-              className={`w-full py-3 px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
+              className={`w-full py-2.5 sm:py-3 px-3 sm:px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
                 isLotFull
                   ? 'bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
                   : isGateOpen
@@ -450,7 +450,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
                   : 'bg-[#2563EB] hover:bg-[#1D4ED8] border-[#1D4ED8] text-white cursor-pointer shadow-md'
               }`}
             >
-              <Play className="w-4 h-4" />
+              <Play className="w-4 h-4 shrink-0" />
               <span>
                 {gateLoading 
                   ? 'Sending Command...' 
@@ -483,12 +483,12 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
         </motion.div>
 
         {/* Right Column: Capacity Breakdown & Recent Activity (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-4 sm:space-y-6">
           {/* Capacity Summary */}
           <motion.div 
             whileHover={{ y: -3, scale: 1.01, boxShadow: '0 14px 28px -5px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-4 transition-colors hover:border-[#3B82F6]/50"
+            className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-3.5 sm:space-y-4 transition-colors hover:border-[#3B82F6]/50"
           >
             <div className="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
               <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
@@ -546,7 +546,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
           <motion.div 
             whileHover={{ y: -3, scale: 1.01, boxShadow: '0 14px 28px -5px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-3 transition-colors hover:border-[#3B82F6]/50"
+            className="bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-3 transition-colors hover:border-[#3B82F6]/50"
           >
             <div className="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
               <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
@@ -568,7 +568,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
                     animate={{ opacity: 1, x: 0 }}
                     whileHover={{ x: 3, scale: 1.01, boxShadow: '0 4px 12px -2px rgba(15,23,42,0.08)' }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className="p-2.5 rounded-[10px] bg-[#F8FAFC] border border-[#E2E8F0] text-xs flex items-center justify-between gap-2 shadow-2xs cursor-default"
+                    className="p-2.5 rounded-[10px] bg-[#F8FAFC] border border-[#E2E8F0] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 shadow-2xs cursor-default"
                   >
                     <div className="flex items-center gap-2 truncate">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] shrink-0" />
@@ -576,7 +576,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
                         {event.message}
                       </span>
                     </div>
-                    <span className="font-mono text-[10px] text-[#64748B] whitespace-nowrap">
+                    <span className="font-mono text-[10px] text-[#64748B] whitespace-nowrap self-end sm:self-auto shrink-0">
                       {formatTime(event.timestamp)}
                     </span>
                   </motion.div>

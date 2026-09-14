@@ -28,14 +28,14 @@ export function SettingsView({ onResetSystem, actionLoading }) {
 
         <div className="divide-y divide-[#E3E7E1]">
           {pinouts.map((item) => (
-            <div key={item.pin} className="py-3 flex items-center justify-between text-xs">
+            <div key={item.pin} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-xs bg-[#F7F8F4] border border-[#E3E7E1] px-2.5 py-1 rounded-[8px] text-[#26332A]">
+                <span className="font-mono font-bold text-xs bg-[#F7F8F4] border border-[#E3E7E1] px-2.5 py-1 rounded-[8px] text-[#26332A] shrink-0">
                   {item.pin}
                 </span>
                 <span className="font-semibold text-[#26332A]">{item.device}</span>
               </div>
-              <span className="text-[#6F786F] font-medium">{item.role}</span>
+              <span className="text-[#6F786F] font-medium text-[11px] sm:text-xs pl-1 sm:pl-0">{item.role}</span>
             </div>
           ))}
         </div>
@@ -71,9 +71,9 @@ export function SettingsView({ onResetSystem, actionLoading }) {
           <button
             onClick={onResetSystem}
             disabled={actionLoading}
-            className="px-5 py-2.5 rounded-[12px] bg-[#D96B5F] hover:bg-[#c6584d] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all"
+            className="w-full sm:w-auto justify-center px-4 sm:px-5 py-2.5 rounded-[12px] bg-[#D96B5F] hover:bg-[#c6584d] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-all text-center"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5 shrink-0" />
             <span>Reset Parking System State (All 3 Bays to Available)</span>
           </button>
         </div>

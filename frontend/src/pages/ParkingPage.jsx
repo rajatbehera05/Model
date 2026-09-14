@@ -169,12 +169,12 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
         <motion.div 
           whileHover={{ y: -3, boxShadow: '0 16px 32px -6px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          className="lg:col-span-8 bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-5 transition-colors hover:border-[#3B82F6]/50"
+          className="lg:col-span-8 bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-4 sm:space-y-5 transition-colors hover:border-[#3B82F6]/50"
         >
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2E8F0] gap-3">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base font-extrabold text-[#0F172A] tracking-tight">
                   Parking Slot Selection
                 </h2>
@@ -188,25 +188,25 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
             </div>
 
             {/* Quick Status Legend */}
-            <div className="flex items-center gap-3 text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] self-start sm:self-auto shadow-xs">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-bold text-[#0F172A] bg-[#F8FAFC] px-2.5 sm:px-3.5 py-1.5 rounded-[12px] border border-[#E2E8F0] self-start sm:self-auto shadow-xs">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
+                <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#10B981]" />
                 <span>Available</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" />
+                <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#F59E0B]" />
                 <span>Reserved</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
+                <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-[#EF4444]" />
                 <span>Occupied</span>
               </span>
             </div>
           </div>
 
           {/* 3 Parking Bays Floor Grid */}
-          <div className="rounded-[16px] bg-[#F8FAFC] border border-[#E2E8F0] p-4 sm:p-6 parking-pavement shadow-xs">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+          <div className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] border border-[#E2E8F0] p-3 sm:p-6 parking-pavement shadow-xs">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6">
               {slotList.map((slot) => {
                 const visual = getSlotVisuals(slot.id, slot.status);
                 const isSelected = selectedSlot === slot.id;
@@ -229,7 +229,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
                         setErrorMessage(null);
                       }
                     }}
-                    className={`relative rounded-[16px] p-5 flex flex-col justify-between min-h-[310px] transition-all select-none ${visual.cardBg} cursor-pointer`}
+                    className={`relative rounded-[14px] sm:rounded-[16px] p-4 sm:p-5 flex flex-col justify-between min-h-[290px] sm:min-h-[310px] transition-all select-none ${visual.cardBg} cursor-pointer`}
                   >
                     {/* Assigned Banner Animation */}
                     <AnimatePresence>
@@ -352,7 +352,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
         <motion.div 
           whileHover={{ y: -3, boxShadow: '0 16px 32px -6px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-          className="lg:col-span-4 bg-white rounded-[18px] border border-[#E2E8F0] p-5 sm:p-6 shadow-card space-y-5 transition-colors hover:border-[#3B82F6]/50"
+          className="lg:col-span-4 bg-white rounded-[16px] sm:rounded-[18px] border border-[#E2E8F0] p-4 sm:p-6 shadow-card space-y-4 sm:space-y-5 transition-colors hover:border-[#3B82F6]/50"
         >
           {/* Action Header */}
           <div className="pb-3 border-b border-[#E2E8F0] flex items-center justify-between">
@@ -360,7 +360,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
               <h3 className="text-base font-extrabold text-[#0F172A] tracking-tight">
                 Parking Actions
               </h3>
-              <p className="text-xs font-semibold text-[#64748B] mt-0.5">
+              <p className="text-xs text-[#64748B] font-semibold mt-0.5">
                 Allocate or reserve a space
               </p>
             </div>
@@ -377,7 +377,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
           <motion.div 
             whileHover={{ y: -3, scale: 1.01, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="rounded-[16px] bg-[#F8FAFC] p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
+            className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] p-3.5 sm:p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">
@@ -397,15 +397,15 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               onClick={handleFindParking}
               disabled={isLotFull || actionLoading}
-              className={`w-full py-3.5 px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
+              className={`w-full py-3 sm:py-3.5 px-3 sm:px-4 rounded-[12px] font-extrabold text-xs sm:text-sm tracking-wide flex items-center justify-center gap-2 border shadow-sm transition-all ${
                 isLotFull
                   ? 'bg-[#F1F5F9] border-[#E2E8F0] text-[#94A3B8] cursor-not-allowed'
                   : 'bg-[#2563EB] hover:bg-[#1D4ED8] border-[#1D4ED8] text-white cursor-pointer shadow-md'
               }`}
             >
-              <Compass className="w-4 h-4" />
+              <Compass className="w-4 h-4 shrink-0" />
               <span>{actionLoading ? 'Assigning Bay...' : isLotFull ? 'Parking Full' : 'Find Parking'}</span>
-              {!isLotFull && <ArrowRight className="w-3.5 h-3.5 ml-0.5" />}
+              {!isLotFull && <ArrowRight className="w-3.5 h-3.5 ml-0.5 shrink-0" />}
             </motion.button>
           </motion.div>
 
@@ -413,7 +413,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
           <motion.div 
             whileHover={{ y: -3, scale: 1.01, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="rounded-[16px] bg-[#F8FAFC] p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
+            className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] p-3.5 sm:p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">
@@ -429,7 +429,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
               <label className="text-[11px] font-bold text-[#64748B] block">
                 Select Parking Space:
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 {slotList.map((slot) => {
                   const isAvailable = slot.status === 'Available';
                   const isSelected = selectedSlot === slot.id;
@@ -445,7 +445,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
                         setSelectedSlot(isSelected ? null : slot.id);
                         setErrorMessage(null);
                       }}
-                      className={`py-2 rounded-[10px] text-xs font-black transition-all border ${
+                      className={`py-2 px-1 rounded-[10px] text-xs font-black transition-all border ${
                         isSelected
                           ? 'bg-[#2563EB] text-white border-[#1D4ED8] shadow-xs'
                           : isAvailable
@@ -467,14 +467,14 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               onClick={handleReserveSpecificSlot}
               disabled={!selectedSlot || actionLoading}
-              className={`w-full py-2.5 px-4 rounded-[12px] font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-2 shadow-xs ${
+              className={`w-full py-2.5 px-3 sm:px-4 rounded-[12px] font-bold text-xs sm:text-sm border-2 transition-all flex items-center justify-center gap-2 shadow-xs ${
                 !selectedSlot
                   ? 'border-[#E2E8F0] text-[#94A3B8] bg-[#F8FAFC] cursor-not-allowed'
                   : 'border-[#2563EB] text-[#2563EB] bg-white hover:bg-[#EFF6FF] cursor-pointer'
               }`}
             >
-              <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
-              <span>
+              <ShieldCheck className="w-4 h-4 text-[#2563EB] shrink-0" />
+              <span className="truncate">
                 {actionLoading 
                   ? 'Reserving...' 
                   : selectedSlot 
@@ -525,7 +525,7 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
           <motion.div 
             whileHover={{ y: -3, scale: 1.01, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="rounded-[16px] bg-[#F8FAFC] p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
+            className="rounded-[14px] sm:rounded-[16px] bg-[#F8FAFC] p-3.5 sm:p-4 border border-[#E2E8F0] space-y-3 shadow-xs"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">
@@ -537,40 +537,40 @@ export function ParkingPage({ data, apiError, onRefreshData }) {
             </div>
 
             {/* Compact Breakdown */}
-            <div className="grid grid-cols-3 gap-2 text-center pt-1">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center pt-1">
               <motion.div 
                 whileHover={{ y: -2, scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
+                className="p-1.5 sm:p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
               >
-                <span className="text-[10px] font-bold text-[#64748B] block">Available</span>
-                <span className="text-base font-black text-[#10B981] mt-0.5 block">{metrics?.available ?? 0}</span>
+                <span className="text-[10px] font-bold text-[#64748B] block truncate">Available</span>
+                <span className="text-sm sm:text-base font-black text-[#10B981] mt-0.5 block">{metrics?.available ?? 0}</span>
               </motion.div>
               <motion.div 
                 whileHover={{ y: -2, scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
+                className="p-1.5 sm:p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
               >
-                <span className="text-[10px] font-bold text-[#64748B] block">Reserved</span>
-                <span className="text-base font-black text-[#F59E0B] mt-0.5 block">{metrics?.reserved ?? 0}</span>
+                <span className="text-[10px] font-bold text-[#64748B] block truncate">Reserved</span>
+                <span className="text-sm sm:text-base font-black text-[#F59E0B] mt-0.5 block">{metrics?.reserved ?? 0}</span>
               </motion.div>
               <motion.div 
                 whileHover={{ y: -2, scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className="p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
+                className="p-1.5 sm:p-2 rounded-lg bg-white border border-[#E2E8F0] shadow-2xs cursor-default"
               >
-                <span className="text-[10px] font-bold text-[#64748B] block">Occupied</span>
-                <span className="text-base font-black text-[#EF4444] mt-0.5 block">{metrics?.occupied ?? 0}</span>
+                <span className="text-[10px] font-bold text-[#64748B] block truncate">Occupied</span>
+                <span className="text-sm sm:text-base font-black text-[#EF4444] mt-0.5 block">{metrics?.occupied ?? 0}</span>
               </motion.div>
             </div>
 
             {/* Entry Gate Status Row */}
-            <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between text-xs font-bold text-[#0F172A]">
+            <div className="pt-2 border-t border-[#E2E8F0] flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs font-bold text-[#0F172A]">
               <div className="flex items-center gap-1.5">
                 {isGateOpen ? (
-                  <DoorOpen className="w-4 h-4 text-[#10B981]" />
+                  <DoorOpen className="w-4 h-4 text-[#10B981] shrink-0" />
                 ) : (
-                  <DoorClosed className="w-4 h-4 text-[#64748B]" />
+                  <DoorClosed className="w-4 h-4 text-[#64748B] shrink-0" />
                 )}
                 <span>Entry Gate:</span>
               </div>

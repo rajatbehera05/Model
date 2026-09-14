@@ -45,7 +45,7 @@ export function MetricsSection({ metrics }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
       {cards.map((card, idx) => {
         const Icon = card.icon;
         return (
@@ -55,27 +55,27 @@ export function MetricsSection({ metrics }) {
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -5, scale: 1.015, boxShadow: '0 12px 28px -6px rgba(15,23,42,0.09)' }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="bg-white rounded-[16px] p-5 border border-[#E2E8F0] shadow-card hover:border-[#3B82F6]/50 hover:shadow-cardHover transition-all cursor-pointer flex flex-col justify-between group"
+            className="bg-white rounded-[14px] sm:rounded-[16px] p-3.5 sm:p-5 border border-[#E2E8F0] shadow-card hover:border-[#3B82F6]/50 hover:shadow-cardHover transition-all cursor-pointer flex flex-col justify-between group"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-[#64748B]">
+            <div className="flex items-center justify-between mb-2 sm:mb-3 gap-1">
+              <span className="text-[11px] sm:text-xs font-bold text-[#64748B] truncate">
                 {card.label}
               </span>
-              <div className={`p-2 rounded-[10px] ${card.iconBg}`}>
-                <Icon className="w-4 h-4" />
+              <div className={`p-1.5 sm:p-2 rounded-[8px] sm:rounded-[10px] shrink-0 ${card.iconBg}`}>
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
             </div>
 
-            <div className="flex items-baseline justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-0.5 sm:gap-1">
               <motion.span
                 key={card.value}
                 initial={{ scale: 0.9, opacity: 0.6 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className={`text-2xl sm:text-3xl font-black ${card.valueColor} tracking-tight`}
+                className={`text-2xl sm:text-3xl font-black ${card.valueColor} tracking-tight leading-none`}
               >
                 {card.value}
               </motion.span>
-              <span className="text-[11px] text-[#64748B] font-semibold">
+              <span className="text-[10px] sm:text-[11px] text-[#64748B] font-semibold leading-tight line-clamp-2 sm:line-clamp-1">
                 {card.subtext}
               </span>
             </div>
