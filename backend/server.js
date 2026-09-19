@@ -251,16 +251,25 @@ app.post('/api/parking/sync-sensors', (req, res) => {
   const source = (body.source || '').toLowerCase();
   const isSimulator = (source === 'simulator');
 
-  // Support raw active-low or boolean inputs for each slot
+  // 1. Process physical or simulated entrance gate detection (IR1 / GPIO 13)
+  const rawEntrance = typeof body.entrance !== 'undefined' ? body.entrance : (typeof body.ir1 !== 'undefined' ? body.ir1 : body.irEntrance);
+
+  // 2. Support raw active-low or boolean inputs for each slot
   const rawP1 = typeof body.p1 !== 'undefined' ? body.p1 : body.P1;
   const rawP2 = typeof body.p2 !== 'undefined' ? body.p2 : body.P2;
   const rawP3 = typeof body.p3 !== 'undefined' ? body.p3 : body.P3;
 
-  const sensorInputs = {
-    P1: parseSensorValue(rawP1, slots.P1.sensorDetected),
-    P2: parseSensorValue(rawP2, slots.P2.sensorDetected),
-    P3: parseSensorValue(rawP3, slots.P3.sensorDetected)
-  };
+  // Build list of slots explicitly provided in payload to avoid overwriting virtual slots (like P3)
+  const slotsToProcess = [];
+  if (typeof rawP1 !== 'undefined') {
+    slotsToProcess.push({ id: 'P1', isDetected: parseSensorValue(rawP1, slots.P1.sensorDetected) });
+  }
+  if (typeof rawP2 !== 'undefined') {
+    slotsToProcess.push({ id: 'P2', isDetected: parseSensorValue(rawP2, slots.P2.sensorDetected) });
+  }
+  if (typeof rawP3 !== 'undefined') {
+    slotsToProcess.push({ id: 'P3', isDetected: parseSensorValue(rawP3, slots.P3.sensorDetected) });
+  }
 
   // Update appropriate watchdog heartbeat
   const now = Date.now();
@@ -274,9 +283,8 @@ app.post('/api/parking/sync-sensors', (req, res) => {
     }
   }
 
-  // Process transitions for each slot
-  for (const slotId of VALID_SLOT_IDS) {
-    const isDetected = sensorInputs[slotId];
+  // Process transitions for provided slots
+  for (const { id: slotId, isDetected } of slotsToProcess) {
     const currentSlot = slots[slotId];
     currentSlot.sensorDetected = isDetected;
 
@@ -308,6 +316,39 @@ app.post('/api/parking/sync-sensors', (req, res) => {
     }
   }
 
+  // 3. Process entrance gate sensor logic
+  if (typeof rawEntrance !== 'undefined') {
+    const isEntranceDetected = parseSensorValue(rawEntrance, false);
+    const preGateMetrics = calculateMetrics();
+
+    if (isEntranceDetected) {
+      // Vehicle at entrance
+      if (preGateMetrics.available > 0) {
+        if (gateState.state !== 'Open') {
+          gateState.state = 'Open';
+          // Clear any manual autoCloseTimer so sensor holds it open
+          if (gateState.autoCloseTimer) {
+            clearTimeout(gateState.autoCloseTimer);
+            gateState.autoCloseTimer = null;
+          }
+          logActivity('GATE_OPENED', 'Entrance barrier opened (90°) - vehicle detected at gate.');
+        }
+      } else {
+        // Lot full - keep gate closed
+        if (gateState.state !== 'Closed') {
+          gateState.state = 'Closed';
+        }
+        logActivity('GATE_BLOCKED', 'Vehicle detected at entrance gate, but parking lot is FULL.');
+      }
+    } else {
+      // Entrance sensor is clear: close gate smoothly if not held by manual UI timer
+      if (gateState.state === 'Open' && !gateState.autoCloseTimer) {
+        gateState.state = 'Closed';
+        logActivity('GATE_CLOSED', 'Vehicle cleared entrance sensor - barrier closed (0°).');
+      }
+    }
+  }
+
   const metrics = calculateMetrics();
   const led = getLedState();
 
@@ -316,8 +357,8 @@ app.post('/api/parking/sync-sensors', (req, res) => {
     message: isSimulator ? 'Simulated sensors synchronized.' : 'Sensors synchronized successfully.',
     source: isSimulator ? 'simulator' : 'hardware',
     command: {
-      ledState: led.on ? 'ON' : 'OFF',
-      gateState: gateState.state
+      gateState: gateState.state,
+      ledState: led.on ? 'ON' : 'OFF'
     },
     metrics
   });
