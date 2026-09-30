@@ -1,321 +1,319 @@
 /*
  * ==============================================================================
- * Project: Smart Parking System (3-Slot Prototype)
- * Phase: Phase 1 - Hardware Bench Test
- * Target Board: ESP32 DevKit v1 (NodeMCU-32S)
+ * Project: Smart Parking System - Physical Hardware Integration
+ * Target Board: ESP32 Dev Module (NodeMCU-32S)
  * Framework: Arduino C++
  *
- * Description:
- * Bench test firmware to independently verify hardware functionality:
- *  - 3x Active-LOW IR Obstacle Sensors (P1: GPIO 13, P2: GPIO 12, P3: GPIO 14)
- *  - 1x SG90 Micro Servo Motor Gate (Signal: GPIO 18)
- *  - 1x Overall Status LED (Anode: GPIO 2 through 220 ohm resistor)
+ * Hardware Pin Mapping (Strictly matched to prototype specification):
+ *  - IR Sensor 1 (Entrance/Gate): GPIO 13 (Active-LOW: LOW = vehicle, HIGH = clear)
+ *  - IR Sensor 2 (Physical Slot P1): GPIO 12 (Active-LOW: LOW = vehicle, HIGH = clear)
+ *  - IR Sensor 3 (Physical Slot P2): GPIO 14 (Active-LOW: LOW = vehicle, HIGH = clear)
+ *  - SG90 Micro Servo (Gate Barrier): GPIO 18 (PWM: 0 deg = Closed, 90 deg = Open)
+ *  - Slot P3: Virtual/software slot (managed by backend)
+ *  - Status LED: OMITTED (No LED used)
  *
- * Features:
- *  - 300ms software debounce for optical sensor stability
- *  - Real-time calculation of Available and Occupied slots
- *  - Status LED: ON if >= 1 slot available, OFF if lot is full (0 available)
- *  - Servo Gate startup verification (0 deg -> 90 deg -> 0 deg)
- *  - Interactive Serial commands ('o' = open gate, 'c' = close gate, 's' = status)
+ * Required Libraries (Install via Arduino Library Manager):
+ *  - ESP32Servo by Kevin Harrington
+ *  - ArduinoJson by Benoit Blanchon (v6 or v7)
+ * Built-in ESP32 core libraries:
+ *  - WiFi.h
+ *  - HTTPClient.h
+ *  - WiFiClientSecure.h
  * ==============================================================================
  */
 
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <ESP32Servo.h>
+#include <ArduinoJson.h>
 
 // -----------------------------------------------------------------------------
-// Pin Configuration (Strictly matched to PRD)
+// USER CONFIGURATION: Wi-Fi & Backend Endpoint
 // -----------------------------------------------------------------------------
-const int PIN_IR_P1  = 13;   // IR Sensor 1 (Slot P1)
-const int PIN_IR_P2  = 12;   // IR Sensor 2 (Slot P2)
-const int PIN_IR_P3  = 14;   // IR Sensor 3 (Slot P3)
-const int PIN_SERVO  = 18;   // SG90 Servo PWM Signal Pin
-const int PIN_LED    = 2;    // Overall Lot Status LED (via 220 ohm resistor)
+const char* WIFI_SSID     = "YOUR_WIFI_SSID";         // Enter your 2.4 GHz Wi-Fi SSID
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";     // Enter your Wi-Fi Password
+
+// Target Backend URL (Deployed Cloud Render Backend):
+const char* BACKEND_URL = "https://model-1-fpn2.onrender.com/api/parking/sync-sensors";
 
 // -----------------------------------------------------------------------------
-// Constants & Configuration
+// Hardware Pin Definitions
 // -----------------------------------------------------------------------------
-const int TOTAL_SLOTS = 3;
-const unsigned long DEBOUNCE_DELAY_MS = 300;   // 300ms debounce as per PRD
-const unsigned long TELEMETRY_INTERVAL_MS = 1000; // Periodic print every 1 second
-
-const int GATE_CLOSED_ANGLE = 0;   // Barrier horizontal (closed)
-const int GATE_OPEN_ANGLE   = 90;  // Barrier vertical (open)
+const int PIN_IR_ENTRANCE = 13; // IR1: Entrance / Barrier Gate
+const int PIN_IR_P1       = 12; // IR2: Physical Slot P1
+const int PIN_IR_P2       = 14; // IR3: Physical Slot P2
+const int PIN_SERVO       = 18; // SG90 Servo PWM
 
 // -----------------------------------------------------------------------------
-// Global Objects & State Variables
+// Operational Constants
 // -----------------------------------------------------------------------------
-Servo gateServo;
+const unsigned long DEBOUNCE_DELAY_MS   = 300;   // 300ms software debounce
+const unsigned long HEARTBEAT_INTERVAL_MS = 2500; // 2.5s watchdog heartbeat sync
+const int GATE_CLOSED_ANGLE             = 0;     // Barrier horizontal (closed)
+const int GATE_OPEN_ANGLE               = 90;    // Barrier vertical (open)
 
-// Debounce state tracking for each slot
-struct SlotSensor {
-  int pin;
+// -----------------------------------------------------------------------------
+// Debounce Tracking Structure
+// -----------------------------------------------------------------------------
+struct DebouncedSensor {
+  const int pin;
   const char* name;
-  bool isOccupied;           // Debounced stable state (true = car present)
-  bool lastRawReading;       // Previous raw reading from digitalRead
+  bool isDetected;              // Debounced stable state (true = car present)
+  bool lastRawReading;          // Previous raw digitalRead() reading
   unsigned long lastChangeTime; // Timestamp of raw state transition
 };
 
-SlotSensor slots[TOTAL_SLOTS] = {
-  { PIN_IR_P1, "P1", false, true, 0 },
-  { PIN_IR_P2, "P2", false, true, 0 },
-  { PIN_IR_P3, "P3", false, true, 0 }
-};
+DebouncedSensor sensorEntrance = { PIN_IR_ENTRANCE, "Entrance (IR1)", false, true, 0 };
+DebouncedSensor sensorP1       = { PIN_IR_P1,       "Slot P1 (IR2)",   false, true, 0 };
+DebouncedSensor sensorP2       = { PIN_IR_P2,       "Slot P2 (IR3)",   false, true, 0 };
 
-int occupiedCount = 0;
-int availableCount = 3;
-unsigned long lastTelemetryTime = 0;
-
-// -----------------------------------------------------------------------------
-// Function Prototypes
-// -----------------------------------------------------------------------------
-void readSensorsWithDebounce();
-void updateParkingStatus();
-void setGateAngle(int angle);
-void testServoSequence();
-void printTelemetry();
-void handleSerialCommands();
+// Servo and timing state
+Servo gateServo;
+int currentGateAngle = GATE_CLOSED_ANGLE;
+unsigned long lastHeartbeatTime = 0;
 
 // -----------------------------------------------------------------------------
-// Arduino Setup Function
+// Function Declarations
+// -----------------------------------------------------------------------------
+void connectToWiFi();
+bool updateDebouncedSensor(DebouncedSensor &sensor, unsigned long now);
+void syncWithBackend();
+void setGateAngle(int targetAngle);
+
+// -----------------------------------------------------------------------------
+// Arduino setup()
 // -----------------------------------------------------------------------------
 void setup() {
-  // Initialize USB Serial Monitor
   Serial.begin(115200);
   delay(500);
 
   Serial.println();
   Serial.println("=================================================");
-  Serial.println("   IoT Smart Parking System - Bench Test (Phase 1)");
+  Serial.println("   IoT Smart Parking System - ESP32 Controller   ");
   Serial.println("=================================================");
-  Serial.println("[INFO] Booting ESP32 Controller...");
 
-  // 1. Configure IR sensor pins with internal pull-up
-  // Active-LOW sensors: Output is LOW when car is detected, HIGH when empty
-  for (int i = 0; i < TOTAL_SLOTS; i++) {
-    pinMode(slots[i].pin, INPUT_PULLUP);
-    bool initialRaw = digitalRead(slots[i].pin);
-    slots[i].lastRawReading = initialRaw;
-    slots[i].isOccupied = (initialRaw == LOW); // LOW = obstacle detected
-  }
-  Serial.println("[OK] IR Sensor Pins configured (GPIO 13, 12, 14 as INPUT_PULLUP)");
+  // 1. Configure active-LOW IR sensors with internal pull-ups
+  pinMode(sensorEntrance.pin, INPUT_PULLUP);
+  pinMode(sensorP1.pin,       INPUT_PULLUP);
+  pinMode(sensorP2.pin,       INPUT_PULLUP);
 
-  // 2. Configure overall status LED pin
-  pinMode(PIN_LED, OUTPUT);
-  digitalWrite(PIN_LED, LOW);
-  Serial.println("[OK] Status LED Pin configured (GPIO 2 as OUTPUT)");
+  // Read initial states (Active-LOW: LOW = Obstacle Detected)
+  sensorEntrance.lastRawReading = digitalRead(sensorEntrance.pin);
+  sensorEntrance.isDetected     = (sensorEntrance.lastRawReading == LOW);
 
-  // 3. Configure SG90 Servo
-  // Allow allocation of all timers for ESP32Servo library
+  sensorP1.lastRawReading       = digitalRead(sensorP1.pin);
+  sensorP1.isDetected           = (sensorP1.lastRawReading == LOW);
+
+  sensorP2.lastRawReading       = digitalRead(sensorP2.pin);
+  sensorP2.isDetected           = (sensorP2.lastRawReading == LOW);
+
+  Serial.println("[OK] IR Sensors configured (GPIO 13 Entrance, GPIO 12 P1, GPIO 14 P2)");
+
+  // 2. Configure SG90 Servo
   ESP32PWM::allocateTimer(0);
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
-  gateServo.setPeriodHertz(50); // Standard 50Hz servo PWM
-  gateServo.attach(PIN_SERVO, 500, 2400); // Standard SG90 micro-servo pulse width
+  gateServo.setPeriodHertz(50);              // Standard 50Hz PWM
+  gateServo.attach(PIN_SERVO, 500, 2400);    // Standard SG90 pulse width
+  setGateAngle(GATE_CLOSED_ANGLE);
+  Serial.println("[OK] SG90 Gate Servo attached on GPIO 18 (Initialized to 0 deg Closed)");
 
-  Serial.println("[OK] SG90 Servo attached on GPIO 18");
-  Serial.println("[INFO] Running Servo self-test sequence...");
-  testServoSequence();
+  // 3. Connect to Wi-Fi network
+  connectToWiFi();
 
-  // 4. Initial status calculation
-  updateParkingStatus();
-
-  Serial.println("-------------------------------------------------");
-  Serial.println("System Ready! You can type commands in Serial:");
-  Serial.println("  'o' -> Open entrance gate (90 deg for 3s)");
-  Serial.println("  'c' -> Close entrance gate (0 deg)");
-  Serial.println("  's' -> Print instant status");
-  Serial.println("-------------------------------------------------");
+  // 4. Perform initial state synchronization with backend
+  Serial.println("[INFO] Sending initial sensor states to backend...");
+  syncWithBackend();
+  lastHeartbeatTime = millis();
 }
 
 // -----------------------------------------------------------------------------
-// Arduino Main Loop
+// Arduino loop()
 // -----------------------------------------------------------------------------
 void loop() {
-  // 1. Continuously sample and debounce IR sensors
-  readSensorsWithDebounce();
-
-  // 2. Check for manual commands entered via Serial Monitor
-  handleSerialCommands();
-
-  // 3. Output periodic status telemetry every 1 second
-  unsigned long currentMillis = millis();
-  if (currentMillis - lastTelemetryTime >= TELEMETRY_INTERVAL_MS) {
-    lastTelemetryTime = currentMillis;
-    printTelemetry();
-  }
-
-  // Small delay to yield to ESP32 system tasks
-  delay(10);
-}
-
-// -----------------------------------------------------------------------------
-// Read and Debounce Active-LOW IR Sensors
-// -----------------------------------------------------------------------------
-void readSensorsWithDebounce() {
   unsigned long now = millis();
-  bool stateChangedAny = false;
 
-  for (int i = 0; i < TOTAL_SLOTS; i++) {
-    // Read raw hardware state: LOW = Obstacle, HIGH = Free
-    bool rawState = digitalRead(slots[i].pin);
-
-    // If raw reading changed since last cycle, reset debounce timer
-    if (rawState != slots[i].lastRawReading) {
-      slots[i].lastChangeTime = now;
-      slots[i].lastRawReading = rawState;
-    }
-
-    // If raw reading has been stable for longer than DEBOUNCE_DELAY_MS
-    if ((now - slots[i].lastChangeTime) > DEBOUNCE_DELAY_MS) {
-      bool newOccupiedState = (rawState == LOW);
-
-      // If stable debounced state differs from registered state, update it
-      if (newOccupiedState != slots[i].isOccupied) {
-        slots[i].isOccupied = newOccupiedState;
-        stateChangedAny = true;
-
-        Serial.print("[EVENT] Slot ");
-        Serial.print(slots[i].name);
-        if (slots[i].isOccupied) {
-          Serial.println(" -> OCCUPIED (Car Detected)");
-        } else {
-          Serial.println(" -> AVAILABLE (Car Departed)");
-        }
-      }
-    }
+  // 1. Check Wi-Fi connection and reconnect if lost
+  if (WiFi.status() != WL_CONNECTED) {
+    connectToWiFi();
   }
 
-  // If any slot changed state, immediately update lot counts and LED
-  if (stateChangedAny) {
-    updateParkingStatus();
-    printTelemetry();
+  // 2. Read and debounce all 3 IR sensors (300ms window)
+  bool changedEntrance = updateDebouncedSensor(sensorEntrance, now);
+  bool changedP1       = updateDebouncedSensor(sensorP1, now);
+  bool changedP2       = updateDebouncedSensor(sensorP2, now);
+
+  bool anySensorChanged = changedEntrance || changedP1 || changedP2;
+
+  // 3. Synchronize immediately upon any sensor state change
+  if (anySensorChanged) {
+    Serial.println("[EVENT] Sensor state change detected -> Triggering instant sync.");
+    syncWithBackend();
+    lastHeartbeatTime = now;
   }
+  // 4. Or send periodic watchdog heartbeat every 2.5 seconds
+  else if (now - lastHeartbeatTime >= HEARTBEAT_INTERVAL_MS) {
+    lastHeartbeatTime = now;
+    syncWithBackend();
+  }
+
+  delay(15); // Small yield to ESP32 system tasks
 }
 
 // -----------------------------------------------------------------------------
-// Calculate Counts and Update LED Indicator
+// Debounce Helper for Active-LOW Sensors
 // -----------------------------------------------------------------------------
-void updateParkingStatus() {
-  int currentOccupied = 0;
-  for (int i = 0; i < TOTAL_SLOTS; i++) {
-    if (slots[i].isOccupied) {
-      currentOccupied++;
+bool updateDebouncedSensor(DebouncedSensor &sensor, unsigned long now) {
+  bool rawState = digitalRead(sensor.pin); // LOW = Detected, HIGH = Clear
+
+  // Reset timer on raw bounce
+  if (rawState != sensor.lastRawReading) {
+    sensor.lastChangeTime = now;
+    sensor.lastRawReading = rawState;
+  }
+
+  // Check if state remained stable for >= DEBOUNCE_DELAY_MS
+  if ((now - sensor.lastChangeTime) >= DEBOUNCE_DELAY_MS) {
+    bool stableDetected = (rawState == LOW);
+
+    if (stableDetected != sensor.isDetected) {
+      sensor.isDetected = stableDetected;
+      Serial.print("[SENSOR] ");
+      Serial.print(sensor.name);
+      Serial.print(" transitioned to: ");
+      Serial.println(sensor.isDetected ? "DETECTED (LOW)" : "CLEAR (HIGH)");
+      return true; // State changed
     }
   }
 
-  occupiedCount = currentOccupied;
-  availableCount = TOTAL_SLOTS - occupiedCount;
+  return false;
+}
 
-  // PRD Requirement:
-  // - At least one slot available (availableCount >= 1): LED ON
-  // - All slots occupied (availableCount == 0): LED OFF
-  if (availableCount > 0) {
-    digitalWrite(PIN_LED, HIGH); // LED ON
+// -----------------------------------------------------------------------------
+// Wi-Fi Connection Manager
+// -----------------------------------------------------------------------------
+void connectToWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+
+  Serial.print("[WIFI] Connecting to SSID: ");
+  Serial.println(WIFI_SSID);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  unsigned long startAttempt = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startAttempt < 10000) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("[WIFI] Connected! IP Address: ");
+    Serial.println(WiFi.localIP());
   } else {
-    digitalWrite(PIN_LED, LOW);  // LED OFF (Parking Full)
+    Serial.println("[WIFI] Connection pending / retrying in background...");
   }
 }
 
 // -----------------------------------------------------------------------------
-// Servo Gate Control Function
+// Synchronize Sensor State with Backend API
 // -----------------------------------------------------------------------------
-void setGateAngle(int angle) {
-  gateServo.write(angle);
-}
+void syncWithBackend() {
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("[WARN] Wi-Fi offline - skipping backend sync.");
+    return;
+  }
 
-// -----------------------------------------------------------------------------
-// Servo Self-Test Sequence (0 deg -> 90 deg -> 0 deg)
-// -----------------------------------------------------------------------------
-void testServoSequence() {
-  Serial.println("  -> Setting Gate to CLOSED (0 deg)...");
-  setGateAngle(GATE_CLOSED_ANGLE);
-  delay(800);
+  // Construct JSON request payload
+#if ARDUINOJSON_VERSION_MAJOR >= 7
+  JsonDocument doc;
+#else
+  StaticJsonDocument<384> doc;
+#endif
 
-  Serial.println("  -> Opening Gate to 90 deg...");
-  setGateAngle(GATE_OPEN_ANGLE);
-  delay(1200);
+  doc["source"]   = "hardware";
+  doc["entrance"] = sensorEntrance.isDetected;
+  doc["p1"]       = sensorP1.isDetected;
+  doc["p2"]       = sensorP2.isDetected;
 
-  Serial.println("  -> Closing Gate back to 0 deg...");
-  setGateAngle(GATE_CLOSED_ANGLE);
-  delay(800);
+  String requestBody;
+  serializeJson(doc, requestBody);
 
-  Serial.println("[OK] Servo self-test completed.");
-}
+  HTTPClient http;
+  WiFiClientSecure secureClient;
+  WiFiClient plainClient;
+  bool isHttps = String(BACKEND_URL).startsWith("https://");
 
-// -----------------------------------------------------------------------------
-// Print Clean Status Table to Serial Monitor
-// -----------------------------------------------------------------------------
-void printTelemetry() {
-  int availabilityPct = (availableCount * 100) / TOTAL_SLOTS;
+  if (isHttps) {
+    secureClient.setInsecure(); // Bypass CA verification for development & cloud endpoints
+    http.begin(secureClient, BACKEND_URL);
+  } else {
+    http.begin(plainClient, BACKEND_URL);
+  }
 
-  Serial.println();
-  Serial.println("+------+------------+------------------+");
-  Serial.println("| Slot | Hardware   | Status           |");
-  Serial.println("+------+------------+------------------+");
-  for (int i = 0; i < TOTAL_SLOTS; i++) {
-    Serial.print("|  ");
-    Serial.print(slots[i].name);
-    Serial.print("  | GPIO ");
-    Serial.print(slots[i].pin);
-    if (slots[i].isOccupied) {
-      Serial.println("    | [!] OCCUPIED     |");
+  http.addHeader("Content-Type", "application/json");
+  http.setTimeout(4000); // 4-second timeout
+
+  int httpCode = http.POST(requestBody);
+
+  if (httpCode > 0) {
+    if (httpCode == HTTP_CODE_OK) {
+      String responseBody = http.getString();
+
+#if ARDUINOJSON_VERSION_MAJOR >= 7
+      JsonDocument responseDoc;
+#else
+      StaticJsonDocument<512> responseDoc;
+#endif
+      DeserializationError error = deserializeJson(responseDoc, responseBody);
+
+      if (!error) {
+        // Parse commanded gate state from backend response
+        const char* gateCmd = responseDoc["command"]["gateState"] | "Closed";
+
+        if (strcmp(gateCmd, "Open") == 0) {
+          setGateAngle(GATE_OPEN_ANGLE);
+        } else {
+          setGateAngle(GATE_CLOSED_ANGLE);
+        }
+
+        int avail = responseDoc["metrics"]["available"] | -1;
+        Serial.printf("[SYNC OK] Gate: %s | Available: %d/3\n", gateCmd, avail);
+      } else {
+        Serial.println("[ERR] JSON response parsing failed.");
+      }
     } else {
-      Serial.println("    | [o] AVAILABLE    |");
+      Serial.printf("[WARN] Backend responded with HTTP code: %d\n", httpCode);
     }
+  } else {
+    Serial.printf("[ERR] HTTP POST failed: %s\n", http.errorToString(httpCode).c_str());
   }
-  Serial.println("+------+------------+------------------+");
-  Serial.print("Total: ");
-  Serial.print(TOTAL_SLOTS);
-  Serial.print(" | Occupied: ");
-  Serial.print(occupiedCount);
-  Serial.print(" | Available: ");
-  Serial.print(availableCount);
-  Serial.print(" | Capacity: ");
-  Serial.print(availabilityPct);
-  Serial.println("%");
 
-  Serial.print("Entrance LED: ");
-  Serial.print((availableCount > 0) ? "ON (Spaces Open)" : "OFF (PARKING FULL)");
-  Serial.println();
+  http.end();
 }
 
 // -----------------------------------------------------------------------------
-// Serial Input Command Handler for Manual Testing
+// SG90 Servo Actuator Control (Smooth Transition)
 // -----------------------------------------------------------------------------
-void handleSerialCommands() {
-  if (Serial.available() > 0) {
-    char cmd = Serial.read();
+void setGateAngle(int targetAngle) {
+  if (currentGateAngle == targetAngle) return;
 
-    // Ignore newline or carriage return characters
-    if (cmd == '\r' || cmd == '\n') return;
+  Serial.printf("[SERVO] Moving Gate from %d deg to %d deg...\n", currentGateAngle, targetAngle);
 
-    switch (cmd) {
-      case 'o':
-      case 'O':
-        Serial.println("\n[CMD] Manual Open requested! Raising gate to 90 deg...");
-        setGateAngle(GATE_OPEN_ANGLE);
-        delay(3000); // Hold open for 3 seconds as defined in PRD
-        Serial.println("[CMD] Auto-closing gate back to 0 deg...");
-        setGateAngle(GATE_CLOSED_ANGLE);
-        break;
-
-      case 'c':
-      case 'C':
-        Serial.println("\n[CMD] Manual Close requested! Locking gate at 0 deg...");
-        setGateAngle(GATE_CLOSED_ANGLE);
-        break;
-
-      case 's':
-      case 'S':
-        printTelemetry();
-        break;
-
-      default:
-        Serial.print("\n[?] Unknown command: '");
-        Serial.print(cmd);
-        Serial.println("'. Use 'o' (open), 'c' (close), or 's' (status).");
-        break;
+  // Smooth movement in small steps to protect micro-servo gears
+  int step = (targetAngle > currentGateAngle) ? 3 : -3;
+  while (currentGateAngle != targetAngle) {
+    currentGateAngle += step;
+    if ((step > 0 && currentGateAngle > targetAngle) ||
+        (step < 0 && currentGateAngle < targetAngle)) {
+      currentGateAngle = targetAngle;
     }
+    gateServo.write(currentGateAngle);
+    delay(15);
   }
+
+  Serial.printf("[SERVO] Gate position reached: %d deg\n", currentGateAngle);
 }

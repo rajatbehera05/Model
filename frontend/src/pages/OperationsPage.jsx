@@ -41,11 +41,11 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
   const isSimulatorActive = esp32?.simulatorActive === true || esp32?.mode === 'Simulator';
   const isLotFull = metrics.available === 0;
 
-  // Pin assignments strictly per PRD
+  // Pin assignments strictly matched to hardware specification
   const pinMapping = {
-    P1: { pin: 'GPIO 13', label: 'Slot 1 IR Sensor' },
-    P2: { pin: 'GPIO 12', label: 'Slot 2 IR Sensor' },
-    P3: { pin: 'GPIO 14', label: 'Slot 3 IR Sensor' },
+    P1: { pin: 'GPIO 12', label: 'Slot P1 Physical IR' },
+    P2: { pin: 'GPIO 14', label: 'Slot P2 Physical IR' },
+    P3: { pin: 'Virtual', label: 'Slot P3 Software Bay' },
   };
 
   // Format ISO timestamp
@@ -167,7 +167,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
           </span>
         </motion.div>
 
-        {/* Master LED Command State */}
+        {/* Entrance Gate IR Sensor (GPIO 13) */}
         <motion.div
           whileHover={{ y: -3, scale: 1.015, boxShadow: '0 10px 22px -4px rgba(15,23,42,0.08)' }}
           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -175,20 +175,20 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
         >
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className={`p-2 sm:p-2.5 rounded-[10px] sm:rounded-[12px] border shrink-0 ${
-              isLedOn 
+              isGateOpen 
                 ? 'bg-[#ECFDF5] text-[#065F46] border-[#10B981]' 
-                : 'bg-[#FEF2F2] text-[#EF4444] border-[#FCA5A5]'
+                : 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]'
             }`}>
-              <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5" />
+              <DoorOpen className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">Master LED (GPIO 4)</span>
-              <span className={`font-extrabold text-xs sm:text-sm ${isLedOn ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-                {isLedOn ? 'ON (Spaces Free)' : 'OFF (Lot Full)'}
+              <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">Entrance IR (GPIO 13)</span>
+              <span className={`font-extrabold text-xs sm:text-sm ${isGateOpen ? 'text-[#10B981]' : 'text-[#64748B]'}`}>
+                {isGateOpen ? 'Vehicle Passing' : 'Gate Clear'}
               </span>
             </div>
           </div>
-          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isLedOn ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${isGateOpen ? 'bg-[#10B981] animate-ping' : 'bg-[#94A3B8]'}`} />
         </motion.div>
       </div>
 
@@ -414,7 +414,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block">
-                    Barrier Servo (GPIO 2 PWM)
+                    Barrier Servo (GPIO 18 PWM)
                   </span>
                   <span className="text-base sm:text-lg font-black text-[#0F172A]">
                     {isGateOpen ? 'OPEN — 90° Passable' : 'CLOSED — 0° Blocked'}
@@ -432,7 +432,7 @@ export function OperationsPage({ data, apiError, onRefreshData }) {
             </div>
 
             <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
-              When a vehicle approaches and spaces are available, the servo rotates 90° for passage and automatically returns to 0° after 3 seconds.
+              When a vehicle approaches the entrance sensor (GPIO 13) and spaces are available, the servo rotates 90° for passage and returns to 0° when the vehicle clears.
             </p>
 
             {/* Trigger Gate Button */}

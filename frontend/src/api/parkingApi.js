@@ -59,3 +59,21 @@ export async function toggleSlotCar(slotId) {
   return { ok: res.ok, status: res.status, data };
 }
 
+export async function fetchEnvironmentData() {
+  const res = await fetch(`${API_BASE_URL}/api/environment`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch environmental data: ${res.statusText}`);
+  }
+  return await res.json();
+}
+
+export async function updateEnvironmentData(payload) {
+  const res = await fetch(`${API_BASE_URL}/api/environment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  return { ok: res.ok, status: res.status, data };
+}
+

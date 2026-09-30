@@ -95,6 +95,17 @@ let recentActivity = [
 ];
 
 // -----------------------------------------------------------------------------
+// Environmental State (DHT11/DHT22 Ready)
+// -----------------------------------------------------------------------------
+let environmentState = {
+  temperature: 27.4,
+  humidity: 61,
+  unit: 'metric',
+  source: 'simulation',
+  lastUpdated: new Date().toISOString()
+};
+
+// -----------------------------------------------------------------------------
 // Helper Functions
 // -----------------------------------------------------------------------------
 
@@ -237,6 +248,72 @@ app.get('/api/parking/status', (req, res) => {
     led,
     esp32,
     recentActivity
+  });
+});
+
+/**
+ * GET /api/environment
+ * Returns real-time or simulated environmental climate data (DHT11/DHT22 ready).
+ */
+app.get('/api/environment', (req, res) => {
+  // If in simulation mode, provide subtle realistic ambient drift (25.0°C - 31.0°C, 50% - 70%)
+  if (environmentState.source === 'simulation') {
+    const tempDelta = (Math.random() - 0.5) * 0.3;
+    const humDelta = (Math.random() - 0.5) * 0.8;
+
+    let newTemp = Math.round((environmentState.temperature + tempDelta) * 10) / 10;
+    if (newTemp < 25.0) newTemp = 25.2;
+    if (newTemp > 31.0) newTemp = 30.8;
+
+    let newHum = Math.round(environmentState.humidity + humDelta);
+    if (newHum < 50) newHum = 51;
+    if (newHum > 70) newHum = 69;
+
+    environmentState.temperature = newTemp;
+    environmentState.humidity = newHum;
+    environmentState.lastUpdated = new Date().toISOString();
+  }
+
+  res.json({
+    temperature: environmentState.temperature,
+    humidity: environmentState.humidity,
+    unit: environmentState.unit,
+    source: environmentState.source,
+    timestamp: environmentState.lastUpdated
+  });
+});
+
+/**
+ * POST /api/environment
+ * Modular ingestion endpoint for future physical DHT11/DHT22 sensor on ESP32 or external sensor.
+ * Body: { temperature: number, humidity: number, source?: string, unit?: string }
+ */
+app.post('/api/environment', (req, res) => {
+  const body = req.body || {};
+  if (typeof body.temperature === 'number') {
+    environmentState.temperature = Math.round(body.temperature * 10) / 10;
+  }
+  if (typeof body.humidity === 'number') {
+    environmentState.humidity = Math.round(body.humidity);
+  }
+  if (body.source) {
+    environmentState.source = body.source;
+  }
+  if (body.unit) {
+    environmentState.unit = body.unit;
+  }
+  environmentState.lastUpdated = new Date().toISOString();
+
+  res.json({
+    success: true,
+    message: 'Environmental telemetry updated.',
+    data: {
+      temperature: environmentState.temperature,
+      humidity: environmentState.humidity,
+      unit: environmentState.unit,
+      source: environmentState.source,
+      timestamp: environmentState.lastUpdated
+    }
   });
 });
 
@@ -567,6 +644,8 @@ app.listen(PORT, () => {
   console.log(`  POST http://localhost:${PORT}/api/parking/reserve`);
   console.log(`  POST http://localhost:${PORT}/api/parking/gate/trigger`);
   console.log(`  POST http://localhost:${PORT}/api/parking/reset`);
+  console.log(`  GET  http://localhost:${PORT}/api/environment`);
+  console.log(`  POST http://localhost:${PORT}/api/environment`);
   console.log('-----------------------------------------------------------');
 });
 

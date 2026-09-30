@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Header } from '../components/Header';
 import { LiveParkingMap } from '../components/LiveParkingMap';
 import { ParkingOverviewPanel } from '../components/ParkingOverviewPanel';
+import { EnvironmentalSection } from '../components/EnvironmentalSection';
 import { RecentActivityPreview } from '../components/RecentActivityPreview';
 import { fetchParkingStatus, assignParkingSlot, reserveParkingSlot } from '../api/parkingApi';
 import { AlertCircle, CheckCircle2, X } from 'lucide-react';
@@ -140,6 +141,9 @@ export function DashboardPage() {
             />
           </div>
         </div>
+
+        {/* Environmental Monitoring: Facility Temperature & Humidity */}
+        <EnvironmentalSection />
 
         {/* RECENT ACTIVITY: Compact bottom bar */}
         <RecentActivityPreview activities={data?.recentActivity} />

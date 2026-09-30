@@ -2,6 +2,7 @@ import React from 'react';
 import { MetricsSection } from '../components/MetricsSection';
 import { LiveParkingMap } from '../components/LiveParkingMap';
 import { ParkingOverviewPanel } from '../components/ParkingOverviewPanel';
+import { EnvironmentalSection } from '../components/EnvironmentalSection';
 import { RecentActivityPreview } from '../components/RecentActivityPreview';
 
 export function DashboardView({
@@ -42,6 +43,9 @@ export function DashboardView({
           />
         </div>
       </div>
+
+      {/* Environmental Monitoring Section */}
+      <EnvironmentalSection />
 
       {/* Recent Activity Feed */}
       <RecentActivityPreview activities={data?.recentActivity} />
